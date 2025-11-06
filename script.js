@@ -127,7 +127,7 @@ document.getElementById('contact-form').addEventListener('submit', function(e) {
         from_name: name,
         from_email: email,
         message: message,
-        to_email: 'brunodevelopmentworks@gmail.com'
+        to_email: 'brunocoder13@gmail.com'
     };
 
     emailjs.send(serviceID, templateID, templateParams, publicKey)
@@ -189,3 +189,4 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(el);
     });
 });
+
