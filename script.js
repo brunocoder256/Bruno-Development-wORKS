@@ -1,3 +1,12 @@
+<!-- Include EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+
+// Initialize EmailJS
+(function(){
+    emailjs.init({ publicKey: "29RRfIFwZKq6LY7ea" });
+})();
+
 // Smooth scrolling for navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
@@ -84,7 +93,7 @@ window.addEventListener('scroll', () => {
     }
 });
 
-// Mobile menu toggle (if needed for very small screens)
+// Mobile menu toggle (for small screens)
 const navUl = document.querySelector('nav ul');
 let isMenuOpen = false;
 
@@ -97,7 +106,7 @@ function toggleMenu() {
     }
 }
 
-// Add click event to logo for mobile menu (if needed)
+// Add click event to logo for mobile menu
 document.querySelector('.logo').addEventListener('click', function() {
     if (window.innerWidth <= 480) {
         toggleMenu();
@@ -112,16 +121,13 @@ document.getElementById('contact-form').addEventListener('submit', function(e) {
     const email = document.getElementById('email').value;
     const message = document.getElementById('message').value;
 
-    // Animate form submission
     const button = this.querySelector('.cta-button');
     const originalText = button.textContent;
     button.textContent = 'Sending...';
     button.style.background = 'linear-gradient(135deg, #00bfff, #ffd700)';
 
-    // EmailJS configuration
-    const serviceID = 'default_service'; // Replace with your EmailJS service ID
-    const templateID = 'template_contact'; // Replace with your EmailJS template ID
-    const publicKey = 'your_public_key'; // Replace with your EmailJS public key
+    const serviceID = 'service_prdo83s';
+    const templateID = 'template_2rilelu';
 
     const templateParams = {
         from_name: name,
@@ -130,41 +136,33 @@ document.getElementById('contact-form').addEventListener('submit', function(e) {
         to_email: 'brunocoder13@gmail.com'
     };
 
-    emailjs.send(serviceID, templateID, templateParams, publicKey)
+    emailjs.send(serviceID, templateID, templateParams)
         .then(function(response) {
             console.log('SUCCESS!', response.status, response.text);
             const responseDiv = document.getElementById('form-response');
             responseDiv.innerHTML = '<p style="color: #ffd700; font-weight: 600;">Thank you for your message! I\'ll get back to you soon.</p>';
 
-            // Reset button
             button.textContent = originalText;
             button.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
-
-            // Clear the form
             document.getElementById('contact-form').reset();
-
-            // Animate response
             responseDiv.style.animation = 'fadeInUp 0.5s ease-out';
         }, function(error) {
             console.log('FAILED...', error);
             const responseDiv = document.getElementById('form-response');
             responseDiv.innerHTML = '<p style="color: #ff4444; font-weight: 600;">Sorry, there was an error sending your message. Please try again.</p>';
 
-            // Reset button
             button.textContent = originalText;
             button.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
-
-            // Animate response
             responseDiv.style.animation = 'fadeInUp 0.5s ease-out';
         });
 });
 
-// Add loading animation on page load
+// Page load animation
 window.addEventListener('load', () => {
     document.body.classList.add('loaded');
 });
 
-// Intersection Observer for more advanced scroll animations
+// Intersection Observer for scroll animations
 const observerOptions = {
     threshold: 0.1,
     rootMargin: '0px 0px -50px 0px'
@@ -179,7 +177,6 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 
-// Observe elements for animation
 document.addEventListener('DOMContentLoaded', () => {
     const animateElements = document.querySelectorAll('.service, .project, .testimonial');
     animateElements.forEach(el => {
