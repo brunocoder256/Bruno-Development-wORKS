@@ -1,7 +1,3 @@
-<!-- Include EmailJS SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
-
 // Initialize EmailJS
 (function(){
     emailjs.init({ publicKey: "29RRfIFwZKq6LY7ea" });
@@ -186,4 +182,5 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(el);
     });
 });
+
 
