@@ -1,186 +1,163 @@
-// Initialize EmailJS
-(function(){
-    emailjs.init({ publicKey: "29RRfIFwZKq6LY7ea" });
-})();
+/* script.js — responsive nav, contact bubble + EmailJS contact handler
+   Notes:
+   - EmailJS public key, service and template ids can be replaced below.
+   - If you provided other EmailJS credentials earlier, replace them here.
+*/
 
-// Smooth scrolling for navigation links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
+/* ========== NAV TOGGLE (mobile) ========== */
+document.addEventListener('DOMContentLoaded', function(){
+  // create mobile toggle button if not present
+  const nav = document.querySelector('nav');
+  if(nav){
+    let toggle = document.querySelector('.nav-toggle');
+    if(!toggle){
+      toggle = document.createElement('button');
+      toggle.className = 'nav-toggle';
+      toggle.setAttribute('aria-expanded','false');
+      toggle.setAttribute('aria-label','Toggle navigation');
+      toggle.innerHTML = '☰';
+      nav.insertBefore(toggle, nav.firstChild);
+    }
+    const ul = nav.querySelector('ul');
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!expanded));
+      if(ul){
+        ul.style.display = expanded ? 'none' : 'flex';
+        ul.style.flexDirection = 'column';
+        ul.style.position = 'absolute';
+        ul.style.right = '16px';
+        ul.style.top = '64px';
+        ul.style.background = 'var(--panel)';
+        ul.style.padding = '12px';
+        ul.style.borderRadius = '10px';
+        ul.style.gap = '0.4rem';
+      }
+    });
+  }
+
+  /* ========== Lazy-load images: set loading attr if missing ========== */
+  document.querySelectorAll('img').forEach(img=>{
+    if(!img.hasAttribute('loading')) img.setAttribute('loading','lazy');
+  });
+
+  /* ========== Floating Contact Bubble ========== */
+  const bubble = document.createElement('button');
+  bubble.className = 'contact-bubble';
+  bubble.setAttribute('aria-label','Open contact form');
+  bubble.innerHTML = '<span class="icon">✉</span>';
+  document.body.appendChild(bubble);
+
+  // create small function to spawn particles
+  function spawnParticle(x, y){
+    const p = document.createElement('div');
+    p.className = 'bubble-particle';
+    const size = Math.floor(Math.random()*22) + 8; // 8 - 30px
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = (x) + 'px';
+    p.style.top = (y) + 'px';
+    // choose color between blue and gold shades
+    p.style.background = Math.random() > 0.5 ? 'rgba(14,165,255,0.18)' : 'rgba(212,175,55,0.14)';
+    document.body.appendChild(p);
+    // remove after animation
+    setTimeout(()=> p.remove(), 2200);
+  }
+
+  // particles on hover and click
+  bubble.addEventListener('pointermove', (e)=> {
+    // spawn a few small particles near pointer
+    for(let i=0;i<1;i++){
+      spawnParticle(e.clientX + (Math.random()*20-10), e.clientY + (Math.random()*12-6));
+    }
+  });
+
+  bubble.addEventListener('click', (e)=>{
+    // spawn extra particles
+    for(let i=0;i<6;i++){
+      spawnParticle(e.clientX + (Math.random()*120-60), e.clientY + (Math.random()*80-40));
+    }
+    // scroll to contact section
+    const contactSection = document.querySelector('#contact');
+    if(contactSection){
+      contactSection.scrollIntoView({behavior:'smooth', block:'start'});
+      // focus the first form input for keyboard users
+      const firstInput = document.querySelector('#contact-form input, #contact-form textarea');
+      if(firstInput) firstInput.focus({preventScroll:true});
+    }
+  });
+
+  /* ========== EmailJS form handling ========== */
+  // Only init EmailJS if library is present
+  if (typeof emailjs !== 'undefined') {
+    try {
+      // Replace with your values if different.
+      const EMAILJS_SERVICE = 'service_prdo83s';
+      const EMAILJS_TEMPLATE = 'template_2rilelu';
+      const EMAILJS_PUBLIC_KEY = '29RRfIFwZKq6LY7ea';
+
+      emailjs.init(EMAILJS_PUBLIC_KEY);
+
+      const form = document.getElementById('contact-form');
+      const responseEl = document.getElementById('form-response');
+
+      if(form){
+        form.addEventListener('submit', function(e){
+          e.preventDefault();
+          const submitBtn = form.querySelector('button[type="submit"]');
+          if(submitBtn) submitBtn.disabled = true;
+
+          const data = {
+            from_name: form.name.value || 'No name',
+            from_email: form.email.value || 'no-reply@example.com',
+            message: form.message.value || ''
+          };
+
+          emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, data)
+            .then(function(){
+              if(responseEl) responseEl.innerHTML = '<p style="color:var(--accent-blue);font-weight:700">Message sent — thank you! I will reply soon.</p>';
+              form.reset();
+            }, function(err){
+              console.error('EmailJS error:', err);
+              if(responseEl) responseEl.innerHTML = '<p style="color:#f66;font-weight:700">Could not send message. Please email brunocoder13@gmail.com directly.</p>';
+            })
+            .finally(()=>{
+              if(submitBtn) submitBtn.disabled = false;
+            });
+        });
+      }
+    } catch (err) {
+      console.warn('EmailJS init failed', err);
+    }
+  } else {
+    // EmailJS not loaded — show fallback message on form submit
+    const form = document.getElementById('contact-form');
+    const responseEl = document.getElementById('form-response');
+    if(form){
+      form.addEventListener('submit', function(e){
         e.preventDefault();
-        document.querySelector(this.getAttribute('href')).scrollIntoView({
-            behavior: 'smooth'
-        });
-    });
-});
-
-// Scroll reveal animation
-function revealOnScroll() {
-    const reveals = document.querySelectorAll('.reveal');
-    reveals.forEach(reveal => {
-        const windowHeight = window.innerHeight;
-        const elementTop = reveal.getBoundingClientRect().top;
-        const elementVisible = 150;
-
-        if (elementTop < windowHeight - elementVisible) {
-            reveal.classList.add('active');
+        if(responseEl){
+          responseEl.innerHTML = '<p style="color:var(--accent-gold);font-weight:700">Email service unavailable. Please email brunocoder13@gmail.com directly.</p>';
         }
-    });
-}
-
-window.addEventListener('scroll', revealOnScroll);
-window.addEventListener('load', revealOnScroll);
-
-// Add reveal class to sections
-document.addEventListener('DOMContentLoaded', function() {
-    const sections = document.querySelectorAll('section:not(#hero)');
-    sections.forEach(section => {
-        section.classList.add('reveal');
-    });
-
-    const services = document.querySelectorAll('.service');
-    services.forEach((service, index) => {
-        service.style.animationDelay = `${index * 0.1}s`;
-        service.classList.add('reveal');
-    });
-
-    const projects = document.querySelectorAll('.project');
-    projects.forEach((project, index) => {
-        project.style.animationDelay = `${index * 0.1}s`;
-        project.classList.add('reveal');
-    });
-
-    const testimonials = document.querySelectorAll('.testimonial');
-    testimonials.forEach((testimonial, index) => {
-        testimonial.style.animationDelay = `${index * 0.1}s`;
-        testimonial.classList.add('reveal');
-    });
-});
-
-// Parallax effect for laptop mockup
-window.addEventListener('scroll', () => {
-    const laptop = document.querySelector('.laptop-mockup');
-    if (laptop) {
-        const scrolled = window.pageYOffset;
-        const rate = scrolled * -0.5;
-        laptop.style.transform = `translateY(${rate}px)`;
+      });
     }
-});
+  }
 
-// Button hover effects
-document.querySelectorAll('.cta-button').forEach(button => {
-    button.addEventListener('mouseenter', () => {
-        button.style.transform = 'translateY(-3px) scale(1.05)';
+  /* ========== Small accessibility: focus outlines for keyboard users ========== */
+  (function(){
+    let usingKeyboard = false;
+    window.addEventListener('keydown', function(e){
+      if(e.key === 'Tab') usingKeyboard = true;
     });
-
-    button.addEventListener('mouseleave', () => {
-        button.style.transform = 'translateY(0) scale(1)';
+    window.addEventListener('mousedown', function(){ usingKeyboard = false });
+    document.body.addEventListener('focusin', function(e){
+      if(usingKeyboard){
+        e.target.classList.add('focus-visible');
+      }
     });
-});
-
-// Header scroll effect
-window.addEventListener('scroll', () => {
-    const header = document.querySelector('header');
-    if (window.scrollY > 50) {
-        header.style.background = 'rgba(10, 10, 10, 0.98)';
-        header.style.backdropFilter = 'blur(20px)';
-    } else {
-        header.style.background = 'rgba(10, 10, 10, 0.95)';
-        header.style.backdropFilter = 'blur(10px)';
-    }
-});
-
-// Mobile menu toggle (for small screens)
-const navUl = document.querySelector('nav ul');
-let isMenuOpen = false;
-
-function toggleMenu() {
-    isMenuOpen = !isMenuOpen;
-    if (isMenuOpen) {
-        navUl.classList.add('active');
-    } else {
-        navUl.classList.remove('active');
-    }
-}
-
-// Add click event to logo for mobile menu
-document.querySelector('.logo').addEventListener('click', function() {
-    if (window.innerWidth <= 480) {
-        toggleMenu();
-    }
-});
-
-// Contact form submission with EmailJS
-document.getElementById('contact-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const message = document.getElementById('message').value;
-
-    const button = this.querySelector('.cta-button');
-    const originalText = button.textContent;
-    button.textContent = 'Sending...';
-    button.style.background = 'linear-gradient(135deg, #00bfff, #ffd700)';
-
-    const serviceID = 'service_prdo83s';
-    const templateID = 'template_2rilelu';
-
-    const templateParams = {
-        from_name: name,
-        from_email: email,
-        message: message,
-        to_email: 'brunocoder13@gmail.com'
-    };
-
-    emailjs.send(serviceID, templateID, templateParams)
-        .then(function(response) {
-            console.log('SUCCESS!', response.status, response.text);
-            const responseDiv = document.getElementById('form-response');
-            responseDiv.innerHTML = '<p style="color: #ffd700; font-weight: 600;">Thank you for your message! I\'ll get back to you soon.</p>';
-
-            button.textContent = originalText;
-            button.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
-            document.getElementById('contact-form').reset();
-            responseDiv.style.animation = 'fadeInUp 0.5s ease-out';
-        }, function(error) {
-            console.log('FAILED...', error);
-            const responseDiv = document.getElementById('form-response');
-            responseDiv.innerHTML = '<p style="color: #ff4444; font-weight: 600;">Sorry, there was an error sending your message. Please try again.</p>';
-
-            button.textContent = originalText;
-            button.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
-            responseDiv.style.animation = 'fadeInUp 0.5s ease-out';
-        });
-});
-
-// Page load animation
-window.addEventListener('load', () => {
-    document.body.classList.add('loaded');
-});
-
-// Intersection Observer for scroll animations
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-        }
+    document.body.addEventListener('focusout', function(e){
+      e.target.classList.remove('focus-visible');
     });
-}, observerOptions);
+  })();
 
-document.addEventListener('DOMContentLoaded', () => {
-    const animateElements = document.querySelectorAll('.service, .project, .testimonial');
-    animateElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(50px)';
-        el.style.transition = 'all 0.6s ease';
-        observer.observe(el);
-    });
-});
-
-
+}); // DOMContentLoaded end
